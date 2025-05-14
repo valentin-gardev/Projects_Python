@@ -21,7 +21,7 @@ while True:
     elif pattern_type == 8:
         print('Thank you for trying out my program!')
         break
-
+#asdas
 
     if pattern_type == 1:
         for i in range(1, rows + 1):
