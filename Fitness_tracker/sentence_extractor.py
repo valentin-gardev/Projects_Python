@@ -1,6 +1,8 @@
 from docx import Document
 import random
-
+# This function extracts the sentances by filtering the bold statemens
+# I wanted to practice using information taken from other files
+# This is the reason this function is made seperately 
 
 def extract_category_items(file_path, category):
     document = Document(file_path)
