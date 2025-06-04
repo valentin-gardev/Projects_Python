@@ -1,9 +1,19 @@
+import requests
+
+
 def external_currency_extraction():
     pass
 
 
-def currency_conversion():
-    pass
+def currency_conversion(amount: int, base_currency: int, target_currency: int):
+    url = f"https://moneymorph.dev/api/convert/{amount}/{base_currency}/{target_currency}"
+    response = requests.get(url)
+    data = response.json()
+    if 'result' in data:
+        result = data['response']
+        return result
+    else:
+        return 'Result not available in response!'
 
 
 def show_live_currency_values():
@@ -38,6 +48,7 @@ def menu():
     option_input = check_if_int(choice_menu=option_input)
 
     if option_input == 1:
+        #convert currency, choose from different options
         pass
     elif option_input == 2:
         pass
