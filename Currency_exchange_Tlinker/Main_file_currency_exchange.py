@@ -20,7 +20,7 @@ def show_live_currency_values():
     pass
 
 
-def check_if_int(choice_menu=None):
+def check_if_int(choice_menu=None, choice_currency_conversion=None):
     """
     Checks if needed input is an integer, if not, prints appropriate response
     """
@@ -35,7 +35,26 @@ def check_if_int(choice_menu=None):
 
             except ValueError:
                 choice_menu = input('Invalid input! Please choose a number between 1, 2, 3, 4:')
+    if choice_currency_conversion is not None:
+        while True:
+            try:
+                is_int_choice_currency_conversion = int(choice_currency_conversion)
+                if is_int_choice_currency_conversion not in (1, 2, 3, 4):
+                    choice_currency_conversion = input('Invalid option.')
+            
+            except ValueError:
+                pass
+                
     pass
+
+# Different options are their own functions
+def option_1():
+    print('1. Euro 2. Dollar 3. Bulgarian Lev 4. Japanese Yen')
+    base_currency = input('Convert currency from: ')
+    print('1. Euro 2. Dollar 3. Bulgarian Lev 4. Japanese Yen')
+    target_currency = input('Convert currency into: ')
+    amount = input('Amount: ')
+    converted_currency = currency_conversion(amount, base_currency, target_currency)
 
 
 def menu():
@@ -44,12 +63,12 @@ def menu():
     """
     print('Welcome to the currency exchange information program')
     print('Please choose an option:')
+    print('1. Convert currency')
     option_input = input()
     option_input = check_if_int(choice_menu=option_input)
 
     if option_input == 1:
-        #convert currency, choose from different options
-        pass
+        option_1()
     elif option_input == 2:
         pass
     elif option_input == 3:
