@@ -5,15 +5,14 @@ def external_currency_extraction():
     pass
 
 
-def currency_conversion(amount: int, base_currency: int, target_currency: int):
+def currency_conversion(amount: int, base_currency: str, target_currency: str):
+    # URL showing all the available currencies https://moneymorph.dev/api/currencies
     url = f"https://moneymorph.dev/api/convert/{amount}/{base_currency}/{target_currency}"
     response = requests.get(url)
     data = response.json()
-    if 'result' in data:
-        result = data['response']
-        return result
-    else:
-        return 'Result not available in response!'
+    result = data['response']
+    return result
+
 
 
 def show_live_currency_values():
@@ -41,20 +40,48 @@ def check_if_int(choice_menu=None, choice_currency_conversion=None):
                 is_int_choice_currency_conversion = int(choice_currency_conversion)
                 if is_int_choice_currency_conversion not in (1, 2, 3, 4):
                     choice_currency_conversion = input('Invalid option.')
-            
+
             except ValueError:
                 pass
-                
+
     pass
 
 # Different options are their own functions
 def option_1():
+    print('Base currency:')
+    print('1. Euro 2. Australian Dollar 3. Bulgarian Lev 4. Japanese Yen')
+    base_currency_raw_input = int(input('Convert currency from: '))
+    print('Target currency:')
     print('1. Euro 2. Dollar 3. Bulgarian Lev 4. Japanese Yen')
-    base_currency = input('Convert currency from: ')
-    print('1. Euro 2. Dollar 3. Bulgarian Lev 4. Japanese Yen')
-    target_currency = input('Convert currency into: ')
+    target_currency_raw_input = int(input('Convert currency into: '))
     amount = input('Amount: ')
+    base_currency, target_currency = option_1_currency_to_json(base_currency_raw_input, target_currency_raw_input)
+
     converted_currency = currency_conversion(amount, base_currency, target_currency)
+    return f'{amount} {base_currency} = {converted_currency:.2f} {target_currency}'
+
+
+def option_1_currency_to_json(base_currency_raw_input, target_currency_raw_input):
+    if base_currency_raw_input == 1:
+        base_currency = 'EUR'
+    elif base_currency_raw_input == 2:
+        base_currency = 'AUD'
+    elif base_currency_raw_input == 3:
+        base_currency = 'BGN'
+    elif base_currency_raw_input == 4:
+        base_currency = 'JPY'
+
+    if target_currency_raw_input == 1:
+        target_currency = 'EUR'
+    elif target_currency_raw_input == 2:
+        target_currency = 'AUD'
+    elif target_currency_raw_input == 3:
+        target_currency = 'BGN'
+    elif target_currency_raw_input == 4:
+        target_currency = 'JPY'
+
+    return base_currency, target_currency
+
 
 
 def menu():
@@ -68,7 +95,8 @@ def menu():
     option_input = check_if_int(choice_menu=option_input)
 
     if option_input == 1:
-        option_1()
+        returned_option_1 = option_1()
+        print(returned_option_1)
     elif option_input == 2:
         pass
     elif option_input == 3:
