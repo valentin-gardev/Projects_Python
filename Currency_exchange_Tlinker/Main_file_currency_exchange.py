@@ -6,7 +6,10 @@ def external_currency_extraction():
 
 
 def currency_conversion(amount: int, base_currency: str, target_currency: str):
-    # URL showing all the available currencies https://moneymorph.dev/api/currencies
+    """
+     _ Website used for free currency exchange ratios https://moneymorph.dev
+     - URL showing all the available currencies https://moneymorph.dev/api/currencies
+    """
     url = f"https://moneymorph.dev/api/convert/{amount}/{base_currency}/{target_currency}"
     response = requests.get(url)
     data = response.json()
@@ -62,6 +65,10 @@ def option_1():
 
 
 def option_1_currency_to_json(base_currency_raw_input, target_currency_raw_input):
+    """
+    - Function receives the option the user wants as an integer
+    - Converts those integers to strings that can be used by the request URL
+    """
     if base_currency_raw_input == 1:
         base_currency = 'EUR'
     elif base_currency_raw_input == 2:
