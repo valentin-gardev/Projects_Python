@@ -1,63 +1,56 @@
-# import requests
-#
-# def convert_currency(amount, base_currency, target_currency):
-#     url = f"https://moneymorph.dev/api/convert/{amount}/{base_currency}/{target_currency}"
-#     response = requests.get(url)
-#     data = response.json()
-#
-#     result = data['response']
-#     print(f"{amount} {base_currency} = {result:.2f} {target_currency}")
-#
-#
-# # Example
-# convert_currency(109, 'JPY', 'BGN')
-
 from tkinter import *
 
-window = Tk()  # instantiate an instance of a window
-window.geometry("420x420")  # changes size of window
-window.title("Currency exchange program")
 
-# icon = PhotoImage(file='currency_exchange_logo.png')  # Converts image to 'PhotoImage' that the tkinter can use
-# window.iconphoto(True, icon)  # Function that can use the photoimage
-# window.config(background='black')  # changes background colour, can use hex value
+currency_exchange_window = Tk()
+currency_exchange_window.geometry('420x240')
+currency_exchange_window.title("Currency exchange program")
+window_icon = PhotoImage(file='currency_exchange_logo.png')  # Converts image to 'PhotoImage' that the tkinter can use
+currency_exchange_window.iconphoto(True, window_icon)  # Function that can use the photoimage
+# LABEL title
+label_program = Label(currency_exchange_window,
+                      text='Currency Converter',
+                      bd=13,
+                      fg='red',
+                      font=('Ariel', 25, "bold"),
+                      relief=RAISED,
+                      padx=10,
+                      pady=10
+                      )
+# LABEL from / to currencies
+label_currency_from = Label(currency_exchange_window,
+                            text='From:')
+label_currency_to = Label(currency_exchange_window,
+                          text='To:')
+# RADIO BUTTONS options to convert FROM
+available_currencies = ['EUR', 'AUD', 'BGN', 'JPY']
+select_from = IntVar()
+frame_currency_buttons_from = Frame(currency_exchange_window)  # Creating a frame of the currency radio buttons from
+for currency in range(len(available_currencies)):
+    radio_button_currencies_from = Radiobutton(frame_currency_buttons_from, text=available_currencies[currency], variable=select_from, value=currency)
+    radio_button_currencies_from.pack(side='left')
 
-# label = Label(window,
-#               text='Hello world maybesss?',
-#               font=('Arial',40,'bold'),
-#               fg='green',
-#               bg='red',
-#               relief=RAISED, # Setting type of border
-#               bd=10,    # Border width
-#               padx=20,  # Space right and left of border
-#               pady=20,  # Space top and bottom of border
-#               image=icon,  # Placing image into the label
-#               compound='bottom')
-# # Creates a label, an area widget that hold text or image within a window
-# #  Default label, lebel.pack()
-# label.place(x=0,y=0)
-def click():
-    print("Button clicked")
-button = Button(window,
-                text="Click me",
-                command=click,
-                font=("Comic Sans", 30),
-                fg="White",
-                bg='Black',
-                activebackground='Black',
-                activeforeground='White')
-button.pack()
-
-
-#Radiobuttons
-
-choice_currency = ['EUR', 'AUD', 'BGN', 'JYP']
-for index in range(len(choice_currency)):
-    radio_button_currency_checker = Radiobutton(window, text=choice_currency[index])
-
-    radio_button_currency_checker.pack()
+# RADIO BUTTONS options to convert TO
+available_currencies = ['EUR', 'AUD', 'BGN', 'JPY']
+select_to = IntVar()
+frame_currency_buttons_to = Frame(currency_exchange_window)  # Creating a frame of the currency radio buttons to
+for currency in range(len(available_currencies)):
+    radio_button_currencies_to = Radiobutton(frame_currency_buttons_to, text=available_currencies[currency], variable=select_to, value=currency)
+    radio_button_currencies_to.pack(side='left')
 
 
+# LABEL and TEXT for amount
+currency_amount = Label(currency_exchange_window,
+                        text='Amount:')
+text = Text(currency_exchange_window, height= 5, width= 50)
 
+# Conversion BUTTON
 
-window.mainloop()  # places window on screen and listens to events
+conversion_button = Button()
+label_program.pack()
+label_currency_from.pack()
+frame_currency_buttons_from.pack()
+label_currency_to.pack()
+frame_currency_buttons_to.pack()
+currency_amount.pack()
+text.pack()
+currency_exchange_window.mainloop()
