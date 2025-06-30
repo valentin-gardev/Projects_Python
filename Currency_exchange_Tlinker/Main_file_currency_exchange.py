@@ -1,8 +1,5 @@
+from tkinter import *
 import requests
-
-
-def external_currency_extraction():
-    pass
 
 
 def currency_conversion(amount: int, base_currency: str, target_currency: str):
@@ -17,99 +14,103 @@ def currency_conversion(amount: int, base_currency: str, target_currency: str):
     return result
 
 
-
-def show_live_currency_values():
-    pass
-
-
-def check_if_int(choice_menu=None, choice_currency_conversion=None):
+def clicked_conversion_button():
     """
-    Checks if needed input is an integer, if not, prints appropriate response
+    Conversion button is clicked:
+    - gets the two radio button selections(from/to)
+    - calls function checking if the Amount text given is a string
+    - calls currency_conversion_api function that converts the given amount from x to y currency
+    - updates the converted currency label
     """
-    if choice_menu is not None:
-        while True:
-            try:
-                choice_menu = int(choice_menu)
-                if choice_menu not in (1, 2, 3, 4):
-                    choice_menu = input('Invalid number! Please choose between options 1, 2, 3, 4:')
-                else:
-                    return choice_menu
-
-            except ValueError:
-                choice_menu = input('Invalid input! Please choose a number between 1, 2, 3, 4:')
-    if choice_currency_conversion is not None:
-        while True:
-            try:
-                is_int_choice_currency_conversion = int(choice_currency_conversion)
-                if is_int_choice_currency_conversion not in (1, 2, 3, 4):
-                    choice_currency_conversion = input('Invalid option.')
-
-            except ValueError:
-                pass
-
-    pass
-
-# Different options are their own functions
-def option_1():
-    print('Base currency:')
-    print('1. Euro 2. Australian Dollar 3. Bulgarian Lev 4. Japanese Yen')
-    base_currency_raw_input = int(input('Convert currency from: '))
-    print('Target currency:')
-    print('1. Euro 2. Dollar 3. Bulgarian Lev 4. Japanese Yen')
-    target_currency_raw_input = int(input('Convert currency into: '))
-    amount = input('Amount: ')
-    base_currency, target_currency = option_1_currency_to_json(base_currency_raw_input, target_currency_raw_input)
-
-    converted_currency = currency_conversion(amount, base_currency, target_currency)
-    return f'{amount} {base_currency} = {converted_currency:.2f} {target_currency}'
+    selected_from = select_from.get()
+    selected_to = select_to.get()
+    amount_put_for_conversion = check_if_string()
+    converted_amount = currency_conversion(amount_put_for_conversion, selected_from, selected_to)
+    label_converted_currency.config(text=converted_amount)
 
 
-def option_1_currency_to_json(base_currency_raw_input, target_currency_raw_input):
-    """
-    - Function receives the option the user wants as an integer
-    - Converts those integers to strings that can be used by the request URL
-    """
-    if base_currency_raw_input == 1:
-        base_currency = 'EUR'
-    elif base_currency_raw_input == 2:
-        base_currency = 'AUD'
-    elif base_currency_raw_input == 3:
-        base_currency = 'BGN'
-    elif base_currency_raw_input == 4:
-        base_currency = 'JPY'
+def check_if_string():  # Check if the input amount text is an integer
+    amount_input = text_amount_input.get('1.0', END)
+    try:
+        amount_input = int(amount_input)
+        return amount_input
+    except:
+        amount_input = str(amount_input)
+        label_converted_currency.config(text='Please input a natural number')
+# def test_print()
 
-    if target_currency_raw_input == 1:
-        target_currency = 'EUR'
-    elif target_currency_raw_input == 2:
-        target_currency = 'AUD'
-    elif target_currency_raw_input == 3:
-        target_currency = 'BGN'
-    elif target_currency_raw_input == 4:
-        target_currency = 'JPY'
+currency_exchange_window = Tk()
+currency_exchange_window.geometry('420x320')
+currency_exchange_window.title("Currency exchange program")
+window_icon = PhotoImage(file='currency_exchange_logo.png')  # Converts image to 'PhotoImage' that the tkinter can use
+currency_exchange_window.iconphoto(True, window_icon)  # Function that can use the photoimage
+# LABEL title
+label_program = Label(currency_exchange_window,
+                      text='Currency Converter',
+                      bd=13,
+                      fg='red',
+                      font=('Ariel', 25, "bold"),
+                      relief=RAISED,
+                      padx=10,
+                      pady=10
+                      )
+# LABEL from / to currencies
+label_currency_from = Label(currency_exchange_window,
+                            text='From:')
+label_currency_to = Label(currency_exchange_window,
+                          text='To:')
+# RADIO BUTTONS options to convert FROM
+available_currencies = ['EUR', 'AUD', 'BGN', 'JPY']
+select_from = StringVar()
+frame_currency_buttons_from = Frame(currency_exchange_window)  # Creating a frame of the currency radio buttons from
+for currency in available_currencies:
+    radio_button_currencies_from = Radiobutton(frame_currency_buttons_from,
+                                               text=currency,
+                                               variable=select_from,
+                                               value=currency,
+                                               )
+    radio_button_currencies_from.pack(side='left')
 
-    return base_currency, target_currency
+select_from.set('EUR')  # Setting the starting selected button with the index
+# RADIO BUTTONS options to convert TO
+available_currencies = ['EUR', 'AUD', 'BGN', 'JPY']
+select_to = StringVar()
 
+frame_currency_buttons_to = Frame(currency_exchange_window)  # Creating a frame of the currency radio buttons to
+for currency in available_currencies:
+    radio_button_currencies_to = Radiobutton(frame_currency_buttons_to,
+                                             text=currency,
+                                             variable=select_to,
+                                             value=currency,
+                                             )
+    radio_button_currencies_to.pack(side='left')
+select_to.set('EUR')
 
+# LABEL and TEXT for amount
+currency_amount = Label(currency_exchange_window,
+                        text='Amount:')
+text_amount_input = Text(currency_exchange_window,
+            height=1,
+            width=10,
+            )
 
-def menu():
-    """
-    Menu inputs for selecting currencies:
-    """
-    print('Welcome to the currency exchange information program')
-    print('Please choose an option:')
-    print('1. Convert currency')
-    option_input = input()
-    option_input = check_if_int(choice_menu=option_input)
+# Conversion BUTTON
+# Check if the Amount label is a string or float, if it is string, print message, output a message box if it is not int
 
-    if option_input == 1:
-        returned_option_1 = option_1()
-        print(returned_option_1)
-    elif option_input == 2:
-        pass
-    elif option_input == 3:
-        pass
-    elif option_input == 4:
-        pass
-    pass
+conversion_button = Button(currency_exchange_window,
+                           text='Convert',
+                           command=clicked_conversion_button,
+                           )
 
-menu()
+label_converted_currency = Label(currency_exchange_window,
+                   text='')
+label_program.pack()
+label_currency_from.pack()
+frame_currency_buttons_from.pack()
+label_currency_to.pack()
+frame_currency_buttons_to.pack()
+currency_amount.pack()
+text_amount_input.pack()
+conversion_button.pack()
+label_converted_currency.pack()
+currency_exchange_window.mainloop()
