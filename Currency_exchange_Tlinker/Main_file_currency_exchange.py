@@ -25,8 +25,10 @@ def clicked_conversion_button():
     selected_from = select_from.get()
     selected_to = select_to.get()
     amount_put_for_conversion = check_if_string()
-    converted_amount = currency_conversion(amount_put_for_conversion, selected_from, selected_to)
-    label_converted_currency.config(text=converted_amount)
+    # Making everything a string, so it can easily be put together in the final output
+    converted_amount = str(currency_conversion(amount_put_for_conversion, selected_from, selected_to))
+    amount_put_for_conversion = str(amount_put_for_conversion)
+    label_converted_currency.config(text=amount_put_for_conversion + ' ' + selected_from + ' = ' + converted_amount + ' ' + selected_to)
 
 
 def check_if_string():  # Check if the input amount text is an integer
@@ -35,7 +37,6 @@ def check_if_string():  # Check if the input amount text is an integer
         amount_input = int(amount_input)
         return amount_input
     except:
-        amount_input = str(amount_input)
         label_converted_currency.config(text='Please input a natural number')
 # def test_print()
 
@@ -90,9 +91,9 @@ select_to.set('EUR')
 currency_amount = Label(currency_exchange_window,
                         text='Amount:')
 text_amount_input = Text(currency_exchange_window,
-            height=1,
-            width=10,
-            )
+                         height=1,
+                         width=10,
+                         )
 
 # Conversion BUTTON
 # Check if the Amount label is a string or float, if it is string, print message, output a message box if it is not int
@@ -103,7 +104,7 @@ conversion_button = Button(currency_exchange_window,
                            )
 
 label_converted_currency = Label(currency_exchange_window,
-                   text='')
+                                 text='')
 label_program.pack()
 label_currency_from.pack()
 frame_currency_buttons_from.pack()
