@@ -1,5 +1,5 @@
 import mysql.connector
-login = int(input('1. Login, 2. Register::'))
+login = int(input('1. Login, 2. Register, 3. Delete account::'))
 username = input('username:')
 password = input('password:')
 conn = mysql.connector.connect(
@@ -32,9 +32,15 @@ def login_account():
 
 
 def delete_account():
-    cursor.execute('DELETE FROM account WHERE username = %s', (username,))
-    
-    
+    cursor.execute('SELECT 1 FROM account WHERE username = %s', (username,))
+    result_account = cursor.fetchone()
+    if result_account:
+        cursor.execute('DELETE FROM account WHERE username = %s', (username,))
+        print('account deleted')
+    else:
+        print('Such account doesnt exist')
+
+
 cursor = conn.cursor()
 # Create a database 'accounts' where accounts would be stored with id, username, password
 cursor.execute('CREATE DATABASE IF NOT EXISTS accounts')
@@ -46,7 +52,8 @@ if login == 1:
     login_account()
 elif login == 2:
     register_account()
-
+elif login == 3:
+    delete_account()
 
 
 cursor.execute('SELECT * FROM account')
