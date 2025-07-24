@@ -46,7 +46,7 @@ login_button_menu_sign_in = Button(login_frame,
                              text='Sign in')
 
 login_button_menu_sign_up = Button(login_frame,
-                             text='Sign up',
+                             text='Register',
                              command=lambda:select_frame(sign_up_frame)) # runs first function with no argument, when clicked runs function with argument
 # ___ Sign up Frame ___
 title_label = Label(sign_up_frame,
@@ -70,10 +70,11 @@ password_label = Label(sign_up_frame,
 password_entry = Entry(sign_up_frame,
                        )
 button_menu_sign_in = Button(sign_up_frame,
-                             text='Sign in')
+                             text='Sign in',
+                             command=lambda:select_frame(login_frame))
 
 button_menu_sign_up = Button(sign_up_frame,
-                             text='Sign up')
+                             text='Register account')
 # ___ Account frame ___
 account_title_label = Label(account_frame,
                     text='Welcome (name of account)',
