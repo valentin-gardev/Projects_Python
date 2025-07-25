@@ -1,5 +1,14 @@
 from tkinter import *
+import mysql.connector
 # Functions of the different options
+
+# ___ Connect to database ___
+conn_connect_to_server = mysql.connector.connect(
+    host='localhost',
+    user='root',
+    password='123456'
+)
+cursor_accounts_database = conn_connect_to_server.cursor()
 
 
 def select_frame(frame):
