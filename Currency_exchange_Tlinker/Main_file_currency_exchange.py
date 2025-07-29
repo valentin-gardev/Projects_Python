@@ -2,7 +2,7 @@ from tkinter import *
 import mysql.connector
 # Functions of the different options
 
-# ___ Connect to database ___
+# ___ Connect to DATABASE ___
 conn_connect_to_server = mysql.connector.connect(
     host='localhost',
     user='root',
@@ -10,13 +10,32 @@ conn_connect_to_server = mysql.connector.connect(
 )
 cursor_accounts_database = conn_connect_to_server.cursor()
 
+# ___ DATABASE FUNCTIONS ___
+
+
+def register_account():
+    try:
+        cursor_accounts_database.execute(f'INSERT INTO account(username, password) VALUES (%s, %s)', (username_entry.get(), password_entry.get()))
+        conn_connect_to_server.commit()
+    except mysql.connector.errors.IntegrityError as a:
+        print(f'Error username {username_entry} already exists')
+
+
+def delete_account():
+    cursor_accounts_database.execute('SELECT 1 FROM account WHERE username = %s', (login_username_entry.get(),))
+    result_account = cursor_accounts_database.fetchone()
+    if result_account:
+        cursor_accounts_database.execute('DELETE FROM account WHERE username = %s', (login_username_entry.get(),))
+        print('account deleted')
+    else:
+        print('Such account doesnt exist')
+
 
 def select_frame(frame):
     """Hide all frames and show only the selected one"""
     for f in (login_frame, sign_up_frame):
         f.pack_forget()
     frame.pack(fill='both', expand=True)
-
 
 
 #  App Window
@@ -32,31 +51,31 @@ account_frame = Frame(app_window, background='#9431ce')
 
 # ___ Login Frame ___
 login_title_label = Label(login_frame,
-                    text='Log in',
-                    bd=13,
-                    fg='#D9D02E',
-                    font=('Ariel', 20, "bold"),
-                    relief=RAISED,
-                    padx=10,
-                    pady=10,
-                    bg='#6A2ED9'
-                    )
+                          text='Log in',
+                          bd=13,
+                          fg='#D9D02E',
+                          font=('Ariel', 20, "bold"),
+                          relief=RAISED,
+                          padx=10,
+                          pady=10,
+                          bg='#6A2ED9'
+                          )
 login_username_label = Label(login_frame,
-                       text='Username',
-                       background='#9431ce')
+                             text='Username',
+                             background='#9431ce')
 login_username_entry = Entry(login_frame,
                        )
 login_password_label = Label(login_frame,
-                       text='Password',
-                       background='#9431ce')
+                             text='Password',
+                             background='#9431ce')
 login_password_entry = Entry(login_frame,
                        )
 login_button_menu_sign_in = Button(login_frame,
-                             text='Sign in')
+                                   text='Sign in')
 
 login_button_menu_sign_up = Button(login_frame,
-                             text='Register',
-                             command=lambda:select_frame(sign_up_frame)) # runs first function with no argument, when clicked runs function with argument
+                                   text='Register',
+                                   command=lambda: select_frame(sign_up_frame)) # runs first function with no argument, when clicked runs function with argument
 # ___ Sign up Frame ___
 title_label = Label(sign_up_frame,
                     text='Create an Account',
@@ -80,10 +99,11 @@ password_entry = Entry(sign_up_frame,
                        )
 button_menu_sign_in = Button(sign_up_frame,
                              text='Sign in',
-                             command=lambda:select_frame(login_frame))
+                             command=lambda: select_frame(login_frame))
 
 button_menu_sign_up = Button(sign_up_frame,
-                             text='Register account')
+                             text='Register account',
+                             command=lambda: register_account())
 # ___ Account frame ___
 account_title_label = Label(account_frame,
                     text='Welcome (name of account)',
@@ -124,6 +144,19 @@ account_title_label.pack()
 button_delete_account_ac.pack()
 button_change_password_ac.pack()
 button_browse_contacts_ac.pack()
+
+# ___ DataBase Creation ___
+# Create a database 'accounts' where accounts would be stored with id, username, password
+cursor_accounts_database.execute('CREATE DATABASE IF NOT EXISTS accounts')
+conn_connect_to_server.database = 'accounts'
+# Creates a table with columns ID, USERNAME, PASSWORD
+cursor_accounts_database.execute('CREATE TABLE IF NOT EXISTS account (id INT PRIMARY KEY AUTO_INCREMENT, '
+                                 'username VARCHAR(60) UNIQUE NOT NULL, '
+                                 'password VARCHAR(60) NOT NULL)')
+cursor_accounts_database.execute('CREATE TABLE IF NOT EXISTS account_phones (id INT, '
+                                 'person VARCHAR(60) UNIQUE NOT NULL, '
+                                 'phone_number INT NOT NULL,'
+                                 'FOREIGN KEY (id) REFERENCES account(id))')
 
 
 select_frame(login_frame)
