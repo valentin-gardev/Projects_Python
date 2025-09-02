@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import messagebox
 import mysql.connector
 # Functions of the different options
 
@@ -11,6 +12,26 @@ conn_connect_to_server = mysql.connector.connect(
 cursor_accounts_database = conn_connect_to_server.cursor()
 
 # ___ DATABASE FUNCTIONS ___
+
+# ___ MESSAGE BOXES ___
+
+
+def failed_login():
+    messagebox.showerror(title='Error', message='Wrong username or password')
+
+
+def account_login():
+    usable_username_entry = login_username_entry.get()
+    cursor_accounts_database.execute('SELECT password FROM account WHERE username = %s', (usable_username_entry,))
+    result_of_login = cursor_accounts_database.fetchone()
+    if result_of_login:
+        stored_password = result_of_login[0]
+        if stored_password == login_password_entry:
+            print('Correct password')
+        else:
+            print('incorrect password')
+    else:
+        print('Username does not exist')
 
 
 def register_account():
@@ -28,7 +49,7 @@ def delete_account():
         cursor_accounts_database.execute('DELETE FROM account WHERE username = %s', (login_username_entry.get(),))
         print('account deleted')
     else:
-        print('Such account doesnt exist')
+        print('Such an account doesnt exist')
 
 
 def select_frame(frame):
@@ -36,6 +57,9 @@ def select_frame(frame):
     for f in (login_frame, sign_up_frame):
         f.pack_forget()
     frame.pack(fill='both', expand=True)
+
+
+current_user_id = None
 
 
 #  App Window
