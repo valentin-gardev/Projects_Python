@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
 import mysql.connector
+from tkinter import ttk
 # Functions of the different options
 
 # ___ Connect to DATABASE ___
@@ -14,24 +15,31 @@ cursor_accounts_database = conn_connect_to_server.cursor()
 # ___ DATABASE FUNCTIONS ___
 
 # ___ MESSAGE BOXES ___
+current_user_id = None
 
 
 def failed_login():
-    messagebox.showerror(title='Error', message='Wrong username or password')
+    messagebox.showerror(title='Error', message='Wrong username or password!')
+
+
+def non_existent_user():
+    messagebox.showerror(title='Error', message='Username does not exist!')
 
 
 def account_login():
+    global current_user_id
     usable_username_entry = login_username_entry.get()
     cursor_accounts_database.execute('SELECT password FROM account WHERE username = %s', (usable_username_entry,))
     result_of_login = cursor_accounts_database.fetchone()
     if result_of_login:
         stored_password = result_of_login[0]
-        if stored_password == login_password_entry:
-            print('Correct password')
+        if stored_password == login_password_entry.get():
+            current_user_id = usable_username_entry
+            select_frame(account_frame)
         else:
-            print('incorrect password')
+            failed_login()
     else:
-        print('Username does not exist')
+        non_existent_user()
 
 
 def register_account():
@@ -54,12 +62,24 @@ def delete_account():
 
 def select_frame(frame):
     """Hide all frames and show only the selected one"""
-    for f in (login_frame, sign_up_frame):
+    for f in (login_frame, sign_up_frame, account_frame):
         f.pack_forget()
     frame.pack(fill='both', expand=True)
 
 
-current_user_id = None
+def add_contact():
+    global index_count
+    my_tree.insert(parent='', index='end', iid=index_count, text='Parent',
+                   values=(name_box.get(), lastname_box.get(), number_box.get()))
+    name_box.delete(0, END)
+    lastname_box.delete(0, END)
+    number_box.delete(0, END)
+    index_count += 1
+
+def remove_conract():
+    delete_contact = my_tree.selection()
+    for record in delete_contact:
+        my_tree.delete(record)
 
 
 #  App Window
@@ -95,7 +115,8 @@ login_password_label = Label(login_frame,
 login_password_entry = Entry(login_frame,
                        )
 login_button_menu_sign_in = Button(login_frame,
-                                   text='Sign in')
+                                   text='Sign in',
+                                   command=lambda:account_login())
 
 login_button_menu_sign_up = Button(login_frame,
                                    text='Register',
@@ -128,9 +149,13 @@ button_menu_sign_in = Button(sign_up_frame,
 button_menu_sign_up = Button(sign_up_frame,
                              text='Register account',
                              command=lambda: register_account())
-# ___ Account frame ___
+
+# ___ACCOUNT FRAME___
+account_frame = Frame(app_window, background='#9431ce')
+pack_buttons_left = Frame(account_frame, background='#9431ce')
+contact_management_frame = Frame(account_frame)
 account_title_label = Label(account_frame,
-                    text='Welcome (name of account)',
+                    text=f'Welcome {current_user_id}',
                     bd=13,
                     fg='#D9D02E',
                     font=('Ariel', 20, "bold"),
@@ -139,12 +164,46 @@ account_title_label = Label(account_frame,
                     pady=10,
                     bg='#6A2ED9'
                     )
-button_browse_contacts_ac = Button(account_frame,
-                             text='Browse Contacts')
-button_change_password_ac = Button(account_frame,
-                             text='Change Password')
-button_delete_account_ac = Button(account_frame,
+button_browse_contacts_ac = Button(pack_buttons_left,
+                                   text='Add Contact',
+                                   command=lambda: add_contact()
+                                   )
+button_change_password_ac = Button(pack_buttons_left,
+                                   text='Change Password')
+button_delete_contact_ac = Button(pack_buttons_left,
+                                  text='Delete Contact',
+                                  command=lambda: remove_conract())
+button_delete_account_ac = Button(pack_buttons_left,
                              text='Delete Account')
+button_logout_ac = Button(pack_buttons_left,
+                             text='Logout')
+# ___CONTACT MANAGEMENT___
+# Labels
+contact_name = Label(contact_management_frame, text='Name')
+contact_last_name = Label(contact_management_frame, text='Last Name')
+contact_number = Label(contact_management_frame, text='Number')
+# Entry boxes
+name_box = Entry(contact_management_frame)
+lastname_box = Entry(contact_management_frame)
+number_box = Entry(contact_management_frame)
+
+# ___ TREE ___
+my_tree = ttk.Treeview(account_frame)
+#___ TREE COLUMS ___
+my_tree['columns'] = ('First name', 'Last name', 'PhoneNumber')
+global index_count
+index_count = 0
+
+#___TREE FORMAT COLUMS___
+my_tree.column('#0', width=0, stretch=NO)
+my_tree.column('First name', anchor=W, width=80)
+my_tree.column('Last name', anchor=CENTER, width=120)
+my_tree.column('PhoneNumber', anchor=W, width=150)
+# ___TREE CREATE HEADINGS___
+my_tree.heading('#0', text='Label', anchor=W)
+my_tree.heading('First name', text='First name', anchor=W)
+my_tree.heading('Last name', text='Last name', anchor=CENTER)
+
 # ___ Login frame pack ___
 
 login_title_label.pack()
@@ -168,6 +227,25 @@ account_title_label.pack()
 button_delete_account_ac.pack()
 button_change_password_ac.pack()
 button_browse_contacts_ac.pack()
+# ___packs___
+account_title_label.pack()
+button_browse_contacts_ac.pack(side='left', pady=10, padx=1)
+button_delete_contact_ac.pack(side='left', pady=10, padx=1)
+button_change_password_ac.pack(side='left', pady=10, padx=1)
+button_delete_account_ac.pack(side='left', pady=10, padx=1)
+button_logout_ac.pack(side='left', pady=10, padx=1)
+# contact management
+contact_name.grid(row=0, column=0)
+contact_last_name.grid(row=0, column=1)
+contact_number.grid(row=0, column=2)
+name_box.grid(row=1, column=0)
+lastname_box.grid(row=1, column=1)
+number_box.grid(row=1, column=2)
+
+account_frame.pack(fill='both', expand=True)
+pack_buttons_left.pack(padx=20)
+contact_management_frame.pack(pady=20)
+my_tree.pack()
 
 # ___ DataBase Creation ___
 # Create a database 'accounts' where accounts would be stored with id, username, password
