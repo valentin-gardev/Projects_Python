@@ -263,3 +263,4 @@ cursor_accounts_database.execute('CREATE TABLE IF NOT EXISTS account_phones (id 
 
 select_frame(login_frame)
 app_window.mainloop()
+#test
