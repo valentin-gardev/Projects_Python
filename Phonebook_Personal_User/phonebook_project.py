@@ -164,7 +164,7 @@ account_title_label = Label(account_frame,
                     pady=10,
                     bg='#6A2ED9'
                     )
-button_browse_contacts_ac = Button(pack_buttons_left,
+button_add_contact_ac = Button(pack_buttons_left,
                                    text='Add Contact',
                                    command=lambda: add_contact()
                                    )
@@ -223,13 +223,13 @@ password_entry.pack()
 button_menu_sign_up.pack(pady=5)
 button_menu_sign_in.pack()
 # ___ Account frame pack ___
+button_add_contact_ac.pack()
 account_title_label.pack()
 button_delete_account_ac.pack()
 button_change_password_ac.pack()
-button_browse_contacts_ac.pack()
 # ___packs___
 account_title_label.pack()
-button_browse_contacts_ac.pack(side='left', pady=10, padx=1)
+button_add_contact_ac.pack(side='left', pady=10, padx=1)
 button_delete_contact_ac.pack(side='left', pady=10, padx=1)
 button_change_password_ac.pack(side='left', pady=10, padx=1)
 button_delete_account_ac.pack(side='left', pady=10, padx=1)
@@ -263,4 +263,3 @@ cursor_accounts_database.execute('CREATE TABLE IF NOT EXISTS account_phones (id 
 
 select_frame(login_frame)
 app_window.mainloop()
-#test
