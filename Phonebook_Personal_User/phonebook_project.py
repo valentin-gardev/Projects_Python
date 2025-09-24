@@ -51,13 +51,22 @@ def register_account():
 
 
 def delete_account():
-    cursor_accounts_database.execute('SELECT 1 FROM account WHERE username = %s', (login_username_entry.get(),))
-    result_account = cursor_accounts_database.fetchone()
-    if result_account:
-        cursor_accounts_database.execute('DELETE FROM account WHERE username = %s', (login_username_entry.get(),))
-        print('account deleted')
-    else:
-        print('Such an account doesnt exist')
+    """
+    open a window that needs a password input, if it is correct, delete account and logout. Before deleting another
+    windows pops up asking you are you sure and there are two an
+    :return:
+    """
+    account_deletion_window = Toplevel()
+    account_deletion_window.geometry('200x120')
+    account_deletion_window.title('Account Deletion')
+
+    # cursor_accounts_database.execute('SELECT 1 FROM account WHERE username = %s', (login_username_entry.get(),))
+    # result_account = cursor_accounts_database.fetchone()
+    # if result_account:
+    #     cursor_accounts_database.execute('DELETE FROM account WHERE username = %s', (login_username_entry.get(),))
+    #     print('account deleted')
+    # else:
+    #     print('Such an account doesn't exist')
 
 
 def select_frame(frame):
@@ -168,13 +177,15 @@ button_add_contact_ac = Button(pack_buttons_left,
                                    text='Add Contact',
                                    command=lambda: add_contact()
                                    )
-button_change_password_ac = Button(pack_buttons_left,
-                                   text='Change Password')
 button_delete_contact_ac = Button(pack_buttons_left,
                                   text='Delete Contact',
                                   command=lambda: remove_conract())
+button_change_password_ac = Button(pack_buttons_left,
+                                   text='Change Password')
+
 button_delete_account_ac = Button(pack_buttons_left,
-                             text='Delete Account')
+                                  command=lambda: delete_account(),
+                                  text='Delete Account')
 button_logout_ac = Button(pack_buttons_left,
                              text='Logout')
 # ___CONTACT MANAGEMENT___
@@ -222,12 +233,7 @@ password_label.pack()
 password_entry.pack()
 button_menu_sign_up.pack(pady=5)
 button_menu_sign_in.pack()
-# ___ Account frame pack ___
-button_add_contact_ac.pack()
-account_title_label.pack()
-button_delete_account_ac.pack()
-button_change_password_ac.pack()
-# ___packs___
+# ___ Account frame packs ___
 account_title_label.pack()
 button_add_contact_ac.pack(side='left', pady=10, padx=1)
 button_delete_contact_ac.pack(side='left', pady=10, padx=1)
