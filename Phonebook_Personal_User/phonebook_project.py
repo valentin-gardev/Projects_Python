@@ -57,8 +57,22 @@ def delete_account():
     :return:
     """
     account_deletion_window = Toplevel()
-    account_deletion_window.geometry('200x120')
+    account_deletion_window.geometry('280x120')
     account_deletion_window.title('Account Deletion')
+    account_deletion_username_label = Label(account_deletion_window,
+                                   text='Password')
+    account_deletion_password_label = Label(account_deletion_window,
+                                   text='Confirm Password')
+    account_deletion_username_input = Entry(account_deletion_window)
+    account_deletion_password_input = Entry(account_deletion_window)
+    account_deletion_button = Button(account_deletion_window,
+                                     text='DELETE')
+
+    account_deletion_username_label.pack()
+    account_deletion_username_input.pack()
+    account_deletion_password_label.pack()
+    account_deletion_password_input.pack()
+    account_deletion_button.pack()
 
     # cursor_accounts_database.execute('SELECT 1 FROM account WHERE username = %s', (login_username_entry.get(),))
     # result_account = cursor_accounts_database.fetchone()
@@ -93,7 +107,7 @@ def remove_conract():
 
 #  App Window
 app_window = Tk()
-app_window.geometry('420x420')
+app_window.geometry('500x500')
 app_window.title('Main Menu')
 app_window.config()
 
