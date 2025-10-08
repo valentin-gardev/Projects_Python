@@ -26,6 +26,30 @@ def non_existent_user():
     messagebox.showerror(title='Error', message='Username does not exist!')
 
 
+def delete_account_confirmation(account_deletion_password_input, account_deletion_password_confirm_input):
+    usable_account_deletion_password = account_deletion_password_input.get()
+    usable_account_deletion_password_confirm = account_deletion_password_confirm_input.get()
+    if usable_account_deletion_password == usable_account_deletion_password_confirm:
+        pass
+    # Where I should continue. If these input passwords are correct AND if the account passowrd
+    # matches them as well, go to delete account function and confirm it
+    # Also make the delete account function delete the account
+    confirmation_delete_account_window = Toplevel()
+    confirmation_delete_account_window.geometry('120x120')
+    confirmation_delete_account_window.title('Deletion confirmation')
+    confirmation_delete_account_window_label = Label(confirmation_delete_account_window,
+                                                     text='Are you sure you want to delete your account?')
+    confirmation_delete_account_button_yes =Button(confirmation_delete_account_window,
+                                                   text='Yes',
+                                                   command=lambda: delete_account())
+    confirmation_delete_account_button_no = Button(confirmation_delete_account_window,
+                                                   text='No',
+                                                   command=lambda: confirmation_delete_account_window.destroy())
+    
+    confirmation_delete_account_window_label.pack()
+    confirmation_delete_account_button_yes.pack()
+    confirmation_delete_account_button_no.pack()
+    
 def account_login():
     global current_user_id
     usable_username_entry = login_username_entry.get()
@@ -50,7 +74,7 @@ def register_account():
         print(f'Error username {username_entry} already exists')
 
 
-def delete_account():
+def delete_account_window():
     """
     open a window that needs a password input, if it is correct, delete account and logout. Before deleting another
     windows pops up asking you are you sure and there are two an
@@ -59,20 +83,28 @@ def delete_account():
     account_deletion_window = Toplevel()
     account_deletion_window.geometry('280x120')
     account_deletion_window.title('Account Deletion')
-    account_deletion_username_label = Label(account_deletion_window,
-                                   text='Password')
     account_deletion_password_label = Label(account_deletion_window,
+                                   text='Password')
+    account_deletion_password_confirm_label = Label(account_deletion_window,
                                    text='Confirm Password')
-    account_deletion_username_input = Entry(account_deletion_window)
     account_deletion_password_input = Entry(account_deletion_window)
+    account_deletion_password_confirm_input = Entry(account_deletion_window)
     account_deletion_button = Button(account_deletion_window,
+                                     command=lambda: delete_account_confirmation(account_deletion_password_input, 
+                                                                                 account_deletion_password_confirm_input),
                                      text='DELETE')
 
-    account_deletion_username_label.pack()
-    account_deletion_username_input.pack()
     account_deletion_password_label.pack()
     account_deletion_password_input.pack()
+    account_deletion_password_confirm_label.pack()
+    account_deletion_password_confirm_input.pack()
     account_deletion_button.pack()
+
+
+def delete_account():
+    pass
+
+
 
     # cursor_accounts_database.execute('SELECT 1 FROM account WHERE username = %s', (login_username_entry.get(),))
     # result_account = cursor_accounts_database.fetchone()
@@ -198,7 +230,7 @@ button_change_password_ac = Button(pack_buttons_left,
                                    text='Change Password')
 
 button_delete_account_ac = Button(pack_buttons_left,
-                                  command=lambda: delete_account(),
+                                  command=lambda: delete_account_window(),
                                   text='Delete Account')
 button_logout_ac = Button(pack_buttons_left,
                              text='Logout')
