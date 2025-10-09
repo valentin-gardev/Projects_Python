@@ -26,30 +26,42 @@ def non_existent_user():
     messagebox.showerror(title='Error', message='Username does not exist!')
 
 
-def delete_account_confirmation(account_deletion_password_input, account_deletion_password_confirm_input):
+def delete_account_not_matching_passwords():
+    messagebox.showerror(title='Error', message='Passwords do not match!')
+
+
+def delete_account_incorrect_password():
+    messagebox.showerror(title='Error', message='Wrong password!')
+
+
+def delete_account_confirmation(account_deletion_password_input, account_deletion_password_confirm_input, account_deletion_window):
     usable_account_deletion_password = account_deletion_password_input.get()
     usable_account_deletion_password_confirm = account_deletion_password_confirm_input.get()
+    cursor_accounts_database.execute('SELECT password FROM account WHERE username = %s', (current_user_id,))
+    password_check = cursor_accounts_database.fetchone()
     if usable_account_deletion_password == usable_account_deletion_password_confirm:
-        pass
-    # Where I should continue. If these input passwords are correct AND if the account passowrd
-    # matches them as well, go to delete account function and confirm it
-    # Also make the delete account function delete the account
-    confirmation_delete_account_window = Toplevel()
-    confirmation_delete_account_window.geometry('120x120')
-    confirmation_delete_account_window.title('Deletion confirmation')
-    confirmation_delete_account_window_label = Label(confirmation_delete_account_window,
-                                                     text='Are you sure you want to delete your account?')
-    confirmation_delete_account_button_yes =Button(confirmation_delete_account_window,
-                                                   text='Yes',
-                                                   command=lambda: delete_account())
-    confirmation_delete_account_button_no = Button(confirmation_delete_account_window,
-                                                   text='No',
-                                                   command=lambda: confirmation_delete_account_window.destroy())
-    
-    confirmation_delete_account_window_label.pack()
-    confirmation_delete_account_button_yes.pack()
-    confirmation_delete_account_button_no.pack()
-    
+        if usable_account_deletion_password == password_check[0]:
+            confirmation_delete_account_window = Toplevel()
+            confirmation_delete_account_window.geometry('240x120')
+            confirmation_delete_account_window.title('Deletion confirmation')
+            confirmation_delete_account_window_label = Label(confirmation_delete_account_window,
+                                                             text='Are you sure you want to delete your account?')
+            confirmation_delete_account_button_yes = Button(confirmation_delete_account_window,
+                                                            text='Yes',
+                                                            command=lambda: delete_account(confirmation_delete_account_window, account_deletion_window))
+            confirmation_delete_account_button_no = Button(confirmation_delete_account_window,
+                                                           text='No',
+                                                           command=lambda: confirmation_delete_account_window.destroy())
+
+            confirmation_delete_account_window_label.pack()
+            confirmation_delete_account_button_yes.pack()
+            confirmation_delete_account_button_no.pack()
+        else:
+            delete_account_incorrect_password()
+    else:
+        delete_account_not_matching_passwords()
+
+
 def account_login():
     global current_user_id
     usable_username_entry = login_username_entry.get()
@@ -90,8 +102,9 @@ def delete_account_window():
     account_deletion_password_input = Entry(account_deletion_window)
     account_deletion_password_confirm_input = Entry(account_deletion_window)
     account_deletion_button = Button(account_deletion_window,
-                                     command=lambda: delete_account_confirmation(account_deletion_password_input, 
-                                                                                 account_deletion_password_confirm_input),
+                                     command=lambda: delete_account_confirmation(account_deletion_password_input,
+                                                                                 account_deletion_password_confirm_input,
+                                                                                 account_deletion_window),
                                      text='DELETE')
 
     account_deletion_password_label.pack()
@@ -101,18 +114,16 @@ def delete_account_window():
     account_deletion_button.pack()
 
 
-def delete_account():
-    pass
+def delete_account(confirmation_delete_account_window, account_deletion_window):
+    cursor_accounts_database.execute('DELETE FROM account WHERE username = %s', (current_user_id,))
+    select_frame(login_frame)
+    conn_connect_to_server.commit()
+    # I have a problem with closing the windows after deleting the account
+    if confirmation_delete_account_window.winfo_exists():
+        confirmation_delete_account_window.destroy()
+    if account_deletion_window.winfo_exists():
+       account_deletion_window.destroy()
 
-
-
-    # cursor_accounts_database.execute('SELECT 1 FROM account WHERE username = %s', (login_username_entry.get(),))
-    # result_account = cursor_accounts_database.fetchone()
-    # if result_account:
-    #     cursor_accounts_database.execute('DELETE FROM account WHERE username = %s', (login_username_entry.get(),))
-    #     print('account deleted')
-    # else:
-    #     print('Such an account doesn't exist')
 
 
 def select_frame(frame):
