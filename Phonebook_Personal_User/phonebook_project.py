@@ -148,6 +148,11 @@ def remove_conract():
         my_tree.delete(record)
 
 
+def log_out(current_user_id):
+    select_frame(login_frame)
+    current_user_id = None
+
+    
 #  App Window
 app_window = Tk()
 app_window.geometry('500x500')
