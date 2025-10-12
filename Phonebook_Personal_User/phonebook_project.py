@@ -126,6 +126,10 @@ def delete_account(confirmation_delete_account_window, account_deletion_window):
 
 
 def change_password_window():
+    """
+    -check if passowrds match with if
+    :return: 
+    """
     password_change_window = Toplevel()
     password_change_window.geometry('280x140')
     password_change_window.title('Password Change')
@@ -137,18 +141,23 @@ def change_password_window():
     confirm_password = Entry(password_change_window)
     new_password_label = Label(password_change_window,
                                text='New Password')
-    new_password = Entry(password_change_window)
+    new_password_entry = Entry(password_change_window)
+    change_password_button = Button(password_change_window,
+                                    text='Change Password',
+                                    command=lambda: change_password(new_password_entry, current_user_id))
     current_password_label.pack()
     current_password.pack()
     confirm_password_label.pack()
     confirm_password.pack()
     new_password_label.pack()
-    new_password.pack()
+    new_password_entry.pack()
+    change_password_button.pack()
 
 
-def change_password():
-    pass
-
+def change_password(new_password_entry, current_user_id):
+    new_password = new_password_entry.get()
+    cursor_accounts_database.execute('UPDATE account SET password = %s WHERE username = %s', (new_password, current_user_id))
+    conn_connect_to_server.commit()
 
 def select_frame(frame):
     """Hide all frames and show only the selected one"""
@@ -357,4 +366,5 @@ cursor_accounts_database.execute('CREATE TABLE IF NOT EXISTS account_phones (id 
 
 select_frame(login_frame)
 app_window.mainloop()
+
 
