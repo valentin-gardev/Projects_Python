@@ -125,6 +125,30 @@ def delete_account(confirmation_delete_account_window, account_deletion_window):
        account_deletion_window.destroy()
 
 
+def change_password_window():
+    password_change_window = Toplevel()
+    password_change_window.geometry('280x140')
+    password_change_window.title('Password Change')
+    current_password_label = Label(password_change_window,
+                                   text='Current Password')
+    current_password = Entry(password_change_window)
+    confirm_password_label = Label(password_change_window,
+                                                   text='Confirm Password')
+    confirm_password = Entry(password_change_window)
+    new_password_label = Label(password_change_window,
+                               text='New Password')
+    new_password = Entry(password_change_window)
+    current_password_label.pack()
+    current_password.pack()
+    confirm_password_label.pack()
+    confirm_password.pack()
+    new_password_label.pack()
+    new_password.pack()
+
+
+def change_password():
+    pass
+
 
 def select_frame(frame):
     """Hide all frames and show only the selected one"""
@@ -152,7 +176,7 @@ def log_out(current_user_id):
     select_frame(login_frame)
     current_user_id = None
 
-    
+
 #  App Window
 app_window = Tk()
 app_window.geometry('500x500')
@@ -243,13 +267,15 @@ button_delete_contact_ac = Button(pack_buttons_left,
                                   text='Delete Contact',
                                   command=lambda: remove_conract())
 button_change_password_ac = Button(pack_buttons_left,
+                                   command=lambda: change_password_window(),
                                    text='Change Password')
 
 button_delete_account_ac = Button(pack_buttons_left,
                                   command=lambda: delete_account_window(),
                                   text='Delete Account')
 button_logout_ac = Button(pack_buttons_left,
-                             text='Logout')
+                             text='Logout',
+                          command=lambda: log_out(current_user_id))
 # ___CONTACT MANAGEMENT___
 # Labels
 contact_name = Label(contact_management_frame, text='Name')
@@ -331,3 +357,4 @@ cursor_accounts_database.execute('CREATE TABLE IF NOT EXISTS account_phones (id 
 
 select_frame(login_frame)
 app_window.mainloop()
+
