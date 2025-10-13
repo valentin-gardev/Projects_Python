@@ -34,7 +34,8 @@ def delete_account_incorrect_password():
     messagebox.showerror(title='Error', message='Wrong password!')
 
 
-def delete_account_confirmation(account_deletion_password_input, account_deletion_password_confirm_input, account_deletion_window):
+def delete_account_confirmation(account_deletion_password_input, account_deletion_password_confirm_input, 
+                                account_deletion_window):
     usable_account_deletion_password = account_deletion_password_input.get()
     usable_account_deletion_password_confirm = account_deletion_password_confirm_input.get()
     cursor_accounts_database.execute('SELECT password FROM account WHERE username = %s', (current_user_id,))
@@ -48,7 +49,8 @@ def delete_account_confirmation(account_deletion_password_input, account_deletio
                                                              text='Are you sure you want to delete your account?')
             confirmation_delete_account_button_yes = Button(confirmation_delete_account_window,
                                                             text='Yes',
-                                                            command=lambda: delete_account(confirmation_delete_account_window, account_deletion_window))
+                                                            command=lambda: delete_account(confirmation_delete_account_window,
+                                                                                           account_deletion_window))
             confirmation_delete_account_button_no = Button(confirmation_delete_account_window,
                                                            text='No',
                                                            command=lambda: confirmation_delete_account_window.destroy())
@@ -80,7 +82,8 @@ def account_login():
 
 def register_account():
     try:
-        cursor_accounts_database.execute(f'INSERT INTO account(username, password) VALUES (%s, %s)', (username_entry.get(), password_entry.get()))
+        cursor_accounts_database.execute(f'INSERT INTO account(username, password) VALUES (%s, %s)', (username_entry.get()
+                                                                                                      , password_entry.get()))
         conn_connect_to_server.commit()
     except mysql.connector.errors.IntegrityError as a:
         print(f'Error username {username_entry} already exists')
@@ -128,7 +131,7 @@ def delete_account(confirmation_delete_account_window, account_deletion_window):
 def change_password_window():
     """
     -check if passowrds match with if
-    :return: 
+    :return:
     """
     password_change_window = Toplevel()
     password_change_window.geometry('280x140')
@@ -144,7 +147,10 @@ def change_password_window():
     new_password_entry = Entry(password_change_window)
     change_password_button = Button(password_change_window,
                                     text='Change Password',
-                                    command=lambda: change_password(new_password_entry, current_user_id))
+                                    command=lambda: change_password(current_password,
+                                                                    confirm_password, 
+                                                                    new_password_entry, 
+                                                                    current_user_id))
     current_password_label.pack()
     current_password.pack()
     confirm_password_label.pack()
@@ -154,11 +160,17 @@ def change_password_window():
     change_password_button.pack()
 
 
-def change_password(new_password_entry, current_user_id):
-    new_password = new_password_entry.get()
-    cursor_accounts_database.execute('UPDATE account SET password = %s WHERE username = %s', (new_password, current_user_id))
+def change_password(current_password, confirm_password, new_password_entry, current_user_id):
+    usable_current_password = current_password.get()
+    usable_confirm_password = confirm_password.get()
+    usable_new_password = new_password_entry.get()
+    cursor_accounts_database.execute('UPDATE account SET password = %s WHERE username = %s', (usable_new_password, 
+                                                                                              current_user_id))
     conn_connect_to_server.commit()
-
+    """
+    -Write a if statements if passwords do not match
+    -Make different error windows about it
+    -If password match, change password and add a pop-up window saying that the password has been changed"""
 def select_frame(frame):
     """Hide all frames and show only the selected one"""
     for f in (login_frame, sign_up_frame, account_frame):
@@ -366,5 +378,3 @@ cursor_accounts_database.execute('CREATE TABLE IF NOT EXISTS account_phones (id 
 
 select_frame(login_frame)
 app_window.mainloop()
-
-
