@@ -15,7 +15,8 @@ cursor_accounts_database = conn_connect_to_server.cursor()
 # ___ DATABASE FUNCTIONS ___
 
 # ___ MESSAGE BOXES ___
-current_user_id = None
+current_user = None
+
 
 
 def failed_login():
@@ -34,11 +35,11 @@ def delete_account_incorrect_password():
     messagebox.showerror(title='Error', message='Wrong password!')
 
 
-def delete_account_confirmation(account_deletion_password_input, account_deletion_password_confirm_input, 
+def delete_account_confirmation(account_deletion_password_input, account_deletion_password_confirm_input,
                                 account_deletion_window):
     usable_account_deletion_password = account_deletion_password_input.get()
     usable_account_deletion_password_confirm = account_deletion_password_confirm_input.get()
-    cursor_accounts_database.execute('SELECT password FROM account WHERE username = %s', (current_user_id,))
+    cursor_accounts_database.execute('SELECT password FROM account WHERE username = %s', (current_user,))
     password_check = cursor_accounts_database.fetchone()
     if usable_account_deletion_password == usable_account_deletion_password_confirm:
         if usable_account_deletion_password == password_check[0]:
@@ -49,8 +50,9 @@ def delete_account_confirmation(account_deletion_password_input, account_deletio
                                                              text='Are you sure you want to delete your account?')
             confirmation_delete_account_button_yes = Button(confirmation_delete_account_window,
                                                             text='Yes',
-                                                            command=lambda: delete_account(confirmation_delete_account_window,
-                                                                                           account_deletion_window))
+                                                            command=lambda: delete_account(
+                                                                confirmation_delete_account_window,
+                                                                account_deletion_window))
             confirmation_delete_account_button_no = Button(confirmation_delete_account_window,
                                                            text='No',
                                                            command=lambda: confirmation_delete_account_window.destroy())
@@ -65,15 +67,16 @@ def delete_account_confirmation(account_deletion_password_input, account_deletio
 
 
 def account_login():
-    global current_user_id
+    global current_user
     usable_username_entry = login_username_entry.get()
     cursor_accounts_database.execute('SELECT password FROM account WHERE username = %s', (usable_username_entry,))
     result_of_login = cursor_accounts_database.fetchone()
     if result_of_login:
         stored_password = result_of_login[0]
         if stored_password == login_password_entry.get():
-            current_user_id = usable_username_entry
+            current_user = usable_username_entry
             select_frame(account_frame)
+            load_contacts_from_database()
         else:
             failed_login()
     else:
@@ -82,8 +85,8 @@ def account_login():
 
 def register_account():
     try:
-        cursor_accounts_database.execute(f'INSERT INTO account(username, password) VALUES (%s, %s)', (username_entry.get()
-                                                                                                      , password_entry.get()))
+        cursor_accounts_database.execute(f'INSERT INTO account(username, password) VALUES (%s, %s)',
+                                         (username_entry.get(), password_entry.get()))
         conn_connect_to_server.commit()
     except mysql.connector.errors.IntegrityError as a:
         print(f'Error username {username_entry} already exists')
@@ -99,15 +102,16 @@ def delete_account_window():
     account_deletion_window.geometry('280x120')
     account_deletion_window.title('Account Deletion')
     account_deletion_password_label = Label(account_deletion_window,
-                                   text='Password')
+                                            text='Password')
     account_deletion_password_confirm_label = Label(account_deletion_window,
-                                   text='Confirm Password')
+                                                    text='Confirm Password')
     account_deletion_password_input = Entry(account_deletion_window)
     account_deletion_password_confirm_input = Entry(account_deletion_window)
     account_deletion_button = Button(account_deletion_window,
-                                     command=lambda: delete_account_confirmation(account_deletion_password_input,
-                                                                                 account_deletion_password_confirm_input,
-                                                                                 account_deletion_window),
+                                     command=lambda: delete_account_confirmation(
+                                         account_deletion_password_input,
+                                         account_deletion_password_confirm_input,
+                                         account_deletion_window),
                                      text='DELETE')
 
     account_deletion_password_label.pack()
@@ -118,7 +122,7 @@ def delete_account_window():
 
 
 def delete_account(confirmation_delete_account_window, account_deletion_window):
-    cursor_accounts_database.execute('DELETE FROM account WHERE username = %s', (current_user_id,))
+    cursor_accounts_database.execute('DELETE FROM account WHERE username = %s', (current_user,))
     select_frame(login_frame)
     conn_connect_to_server.commit()
     # I have a problem with closing the windows after deleting the account
@@ -130,7 +134,7 @@ def delete_account(confirmation_delete_account_window, account_deletion_window):
 
 def change_password_window():
     """
-    -check if passowrds match with if
+    -check if passwords match with if
     :return:
     """
     password_change_window = Toplevel()
@@ -140,7 +144,7 @@ def change_password_window():
                                    text='Current Password')
     current_password = Entry(password_change_window)
     confirm_password_label = Label(password_change_window,
-                                                   text='Confirm Password')
+                                   text='Confirm Password')
     confirm_password = Entry(password_change_window)
     new_password_label = Label(password_change_window,
                                text='New Password')
@@ -148,9 +152,8 @@ def change_password_window():
     change_password_button = Button(password_change_window,
                                     text='Change Password',
                                     command=lambda: change_password(current_password,
-                                                                    confirm_password, 
-                                                                    new_password_entry, 
-                                                                    current_user_id))
+                                                                    confirm_password,
+                                                                    new_password_entry))
     current_password_label.pack()
     current_password.pack()
     confirm_password_label.pack()
@@ -160,17 +163,19 @@ def change_password_window():
     change_password_button.pack()
 
 
-def change_password(current_password, confirm_password, new_password_entry, current_user_id):
+def change_password(current_password, confirm_password, new_password_entry):
     usable_current_password = current_password.get()
     usable_confirm_password = confirm_password.get()
     usable_new_password = new_password_entry.get()
-    cursor_accounts_database.execute('UPDATE account SET password = %s WHERE username = %s', (usable_new_password, 
-                                                                                              current_user_id))
+    cursor_accounts_database.execute('UPDATE account SET password = %s WHERE username = %s', (usable_new_password,
+                                                                                              current_user))
     conn_connect_to_server.commit()
     """
     -Write a if statements if passwords do not match
     -Make different error windows about it
     -If password match, change password and add a pop-up window saying that the password has been changed"""
+
+
 def select_frame(frame):
     """Hide all frames and show only the selected one"""
     for f in (login_frame, sign_up_frame, account_frame):
@@ -182,20 +187,60 @@ def add_contact():
     global index_count
     my_tree.insert(parent='', index='end', iid=index_count, text='Parent',
                    values=(name_box.get(), lastname_box.get(), number_box.get()))
+    add_contact_to_database()
     name_box.delete(0, END)
     lastname_box.delete(0, END)
     number_box.delete(0, END)
     index_count += 1
 
-def remove_conract():
+
+def add_contact_to_database():
+    pass
+    """
+    - Fetches unique user ID and gives it a variable
+    - Inserts tree information into database, linking information with unique ID
+    """
+    cursor_accounts_database.execute('SELECT id FROM account WHERE username = %s', (current_user,))
+    current_user_id = cursor_accounts_database.fetchone()
+    name = name_box.get()
+    last_name = lastname_box.get()
+    number = number_box.get()
+    cursor_accounts_database.execute(f'INSERT INTO account_phones(id, first_name, last_name, phone_number) '
+                                     f'VALUES (%s, %s, %s, %s)',
+                                     (current_user_id[0], name, last_name, number))
+    conn_connect_to_server.commit()
+
+
+def load_contacts_from_database():
+    """
+    - Load contacts from database
+    - Make the current used ID the global ID, so it is easier
+    """
+
+    cursor_accounts_database.execute(f'SELECT id FROM account WHERE username = %s',
+                                     (current_user,))
+    current_user_id = cursor_accounts_database.fetchone()
+
+    cursor_accounts_database.execute(f'SELECT first_name, last_name, phone_number FROM account_phones WHERE id = %s',
+                                     (current_user_id[0],))
+    phone_book_data = cursor_accounts_database.fetchall()  # Contains the data in a tuple
+    global index_count
+    for row in phone_book_data:
+        first_name, last_name, phone = row
+        my_tree.insert(parent='', index='end', iid=index_count, text='Parent', values=(first_name, last_name, phone))
+        index_count += 1
+
+
+def remove_contact():
     delete_contact = my_tree.selection()
     for record in delete_contact:
         my_tree.delete(record)
 
 
-def log_out(current_user_id):
+def log_out():
+    global current_user
     select_frame(login_frame)
-    current_user_id = None
+    current_user = None
 
 
 #  App Window
@@ -271,7 +316,7 @@ account_frame = Frame(app_window, background='#9431ce')
 pack_buttons_left = Frame(account_frame, background='#9431ce')
 contact_management_frame = Frame(account_frame)
 account_title_label = Label(account_frame,
-                    text=f'Welcome {current_user_id}',
+                    text=f'Welcome {current_user}',
                     bd=13,
                     fg='#D9D02E',
                     font=('Ariel', 20, "bold"),
@@ -281,12 +326,12 @@ account_title_label = Label(account_frame,
                     bg='#6A2ED9'
                     )
 button_add_contact_ac = Button(pack_buttons_left,
-                                   text='Add Contact',
-                                   command=lambda: add_contact()
+                               text='Add Contact',
+                               command=lambda: add_contact()
                                    )
 button_delete_contact_ac = Button(pack_buttons_left,
                                   text='Delete Contact',
-                                  command=lambda: remove_conract())
+                                  command=lambda: remove_contact())
 button_change_password_ac = Button(pack_buttons_left,
                                    command=lambda: change_password_window(),
                                    text='Change Password')
@@ -295,8 +340,8 @@ button_delete_account_ac = Button(pack_buttons_left,
                                   command=lambda: delete_account_window(),
                                   text='Delete Account')
 button_logout_ac = Button(pack_buttons_left,
-                             text='Logout',
-                          command=lambda: log_out(current_user_id))
+                          text='Logout',
+                          command=lambda: log_out())
 # ___CONTACT MANAGEMENT___
 # Labels
 contact_name = Label(contact_management_frame, text='Name')
@@ -309,7 +354,7 @@ number_box = Entry(contact_management_frame)
 
 # ___ TREE ___
 my_tree = ttk.Treeview(account_frame)
-#___ TREE COLUMS ___
+# ___ TREE COLUMS ___
 my_tree['columns'] = ('First name', 'Last name', 'PhoneNumber')
 global index_count
 index_count = 0
@@ -370,8 +415,10 @@ conn_connect_to_server.database = 'accounts'
 cursor_accounts_database.execute('CREATE TABLE IF NOT EXISTS account (id INT PRIMARY KEY AUTO_INCREMENT, '
                                  'username VARCHAR(60) UNIQUE NOT NULL, '
                                  'password VARCHAR(60) NOT NULL)')
+# Creates a table with columns, ID, First_name, last_name, phone_number
 cursor_accounts_database.execute('CREATE TABLE IF NOT EXISTS account_phones (id INT, '
-                                 'person VARCHAR(60) UNIQUE NOT NULL, '
+                                 'first_name VARCHAR(60) UNIQUE NOT NULL, '
+                                 'last_name VARCHAR(60) UNIQUE NOT NULL, '
                                  'phone_number INT NOT NULL,'
                                  'FOREIGN KEY (id) REFERENCES account(id))')
 
