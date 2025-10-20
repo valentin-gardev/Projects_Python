@@ -18,7 +18,6 @@ cursor_accounts_database = conn_connect_to_server.cursor()
 current_user = None
 
 
-
 def failed_login():
     messagebox.showerror(title='Error', message='Wrong username or password!')
 
@@ -183,19 +182,7 @@ def select_frame(frame):
     frame.pack(fill='both', expand=True)
 
 
-def add_contact():
-    global index_count
-    my_tree.insert(parent='', index='end', iid=index_count, text='Parent',
-                   values=(name_box.get(), lastname_box.get(), number_box.get()))
-    add_contact_to_database()
-    name_box.delete(0, END)
-    lastname_box.delete(0, END)
-    number_box.delete(0, END)
-    index_count += 1
-
-
 def add_contact_to_database():
-    pass
     """
     - Fetches unique user ID and gives it a variable
     - Inserts tree information into database, linking information with unique ID
@@ -209,32 +196,45 @@ def add_contact_to_database():
                                      f'VALUES (%s, %s, %s, %s)',
                                      (current_user_id[0], name, last_name, number))
     conn_connect_to_server.commit()
+    load_contacts_from_database()
+    name_box.delete(0, END)
+    lastname_box.delete(0, END)
+    number_box.delete(0, END)
 
 
 def load_contacts_from_database():
     """
-    - Load contacts from database
-    - Make the current used ID the global ID, so it is easier
+    - Deletes whole tree ,so it can load the database
+    - Takes account ID and uses it to extract contact with that ID
+    - Using a for_cycle display the contacts in the tree
     """
-
+    for contact in my_tree.get_children():
+        my_tree.delete(contact)
     cursor_accounts_database.execute(f'SELECT id FROM account WHERE username = %s',
                                      (current_user,))
     current_user_id = cursor_accounts_database.fetchone()
 
-    cursor_accounts_database.execute(f'SELECT first_name, last_name, phone_number FROM account_phones WHERE id = %s',
+    cursor_accounts_database.execute(f'SELECT first_name, last_name, phone_number, contact_id '
+                                     f'FROM account_phones WHERE id = %s',
                                      (current_user_id[0],))
     phone_book_data = cursor_accounts_database.fetchall()  # Contains the data in a tuple
-    global index_count
     for row in phone_book_data:
-        first_name, last_name, phone = row
-        my_tree.insert(parent='', index='end', iid=index_count, text='Parent', values=(first_name, last_name, phone))
-        index_count += 1
+        first_name, last_name, phone, contact_id = row
+        my_tree.insert(parent='', index='end', iid=contact_id, text='Parent', values=(first_name, last_name, phone))
 
 
 def remove_contact():
-    delete_contact = my_tree.selection()
-    for record in delete_contact:
-        my_tree.delete(record)
+    delete_contacts = my_tree.selection()
+    for record in delete_contacts:
+        contact_id = record
+        remove_contact_from_database(record)
+        my_tree.delete(contact_id)
+
+
+def remove_contact_from_database(contact_id):
+    contact_id = int(contact_id)
+    cursor_accounts_database.execute(f'DELETE FROM account_phones WHERE contact_id = %s', (contact_id, ))
+    conn_connect_to_server.commit()
 
 
 def log_out():
@@ -281,7 +281,8 @@ login_button_menu_sign_in = Button(login_frame,
 
 login_button_menu_sign_up = Button(login_frame,
                                    text='Register',
-                                   command=lambda: select_frame(sign_up_frame)) # runs first function with no argument, when clicked runs function with argument
+                                   command=lambda: select_frame(sign_up_frame))
+# runs first function with no argument, when clicked runs function with argument
 # ___ Sign up Frame ___
 title_label = Label(sign_up_frame,
                     text='Create an Account',
@@ -327,7 +328,7 @@ account_title_label = Label(account_frame,
                     )
 button_add_contact_ac = Button(pack_buttons_left,
                                text='Add Contact',
-                               command=lambda: add_contact()
+                               command=lambda: add_contact_to_database()
                                    )
 button_delete_contact_ac = Button(pack_buttons_left,
                                   text='Delete Contact',
@@ -354,12 +355,10 @@ number_box = Entry(contact_management_frame)
 
 # ___ TREE ___
 my_tree = ttk.Treeview(account_frame)
-# ___ TREE COLUMS ___
+# ___ TREE COLUMNS ___
 my_tree['columns'] = ('First name', 'Last name', 'PhoneNumber')
-global index_count
-index_count = 0
 
-#___TREE FORMAT COLUMS___
+# ___TREE FORMAT COLUMNS___
 my_tree.column('#0', width=0, stretch=NO)
 my_tree.column('First name', anchor=W, width=80)
 my_tree.column('Last name', anchor=CENTER, width=120)
@@ -416,7 +415,8 @@ cursor_accounts_database.execute('CREATE TABLE IF NOT EXISTS account (id INT PRI
                                  'username VARCHAR(60) UNIQUE NOT NULL, '
                                  'password VARCHAR(60) NOT NULL)')
 # Creates a table with columns, ID, First_name, last_name, phone_number
-cursor_accounts_database.execute('CREATE TABLE IF NOT EXISTS account_phones (id INT, '
+cursor_accounts_database.execute('CREATE TABLE IF NOT EXISTS account_phones (id INT,'
+                                 'id_contact INT PRIMARY KEY AUTO_INCREMENT, '
                                  'first_name VARCHAR(60) UNIQUE NOT NULL, '
                                  'last_name VARCHAR(60) UNIQUE NOT NULL, '
                                  'phone_number INT NOT NULL,'
