@@ -1,21 +1,25 @@
 from tkinter import *
 from tkinter import messagebox
-import mysql.connector
 from tkinter import ttk
+import sqlite3
 # Functions of the different options
 
 # ___ Connect to DATABASE ___
-conn_connect_to_server = mysql.connector.connect(
-    host='localhost',
-    user='root',
-    password='123456'
-)
+conn_connect_to_server = sqlite3.connect('User_contact_database.sqlite')
 cursor_accounts_database = conn_connect_to_server.cursor()
 
 # ___ DATABASE FUNCTIONS ___
 
 # ___ MESSAGE BOXES ___
 current_user = None
+
+
+def registration_complete():
+    messagebox.showinfo(title='Registration', message='Your registration is complete!')
+
+
+def registration_fail_user_exists():
+    messagebox.showerror(title='User Exists', message='User already exists!')
 
 
 def failed_login():
@@ -38,7 +42,7 @@ def delete_account_confirmation(account_deletion_password_input, account_deletio
                                 account_deletion_window):
     usable_account_deletion_password = account_deletion_password_input.get()
     usable_account_deletion_password_confirm = account_deletion_password_confirm_input.get()
-    cursor_accounts_database.execute('SELECT password FROM account WHERE username = %s', (current_user,))
+    cursor_accounts_database.execute('SELECT password FROM account WHERE username = ?', (current_user,))
     password_check = cursor_accounts_database.fetchone()
     if usable_account_deletion_password == usable_account_deletion_password_confirm:
         if usable_account_deletion_password == password_check[0]:
@@ -68,7 +72,7 @@ def delete_account_confirmation(account_deletion_password_input, account_deletio
 def account_login():
     global current_user
     usable_username_entry = login_username_entry.get()
-    cursor_accounts_database.execute('SELECT password FROM account WHERE username = %s', (usable_username_entry,))
+    cursor_accounts_database.execute('SELECT password FROM account WHERE username = ?', (usable_username_entry,))
     result_of_login = cursor_accounts_database.fetchone()
     if result_of_login:
         stored_password = result_of_login[0]
@@ -84,11 +88,13 @@ def account_login():
 
 def register_account():
     try:
-        cursor_accounts_database.execute(f'INSERT INTO account(username, password) VALUES (%s, %s)',
+        cursor_accounts_database.execute(f'INSERT INTO account(username, password) VALUES (?, ?)',
                                          (username_entry.get(), password_entry.get()))
         conn_connect_to_server.commit()
-    except mysql.connector.errors.IntegrityError as a:
-        print(f'Error username {username_entry} already exists')
+        registration_complete()
+        select_frame(login_frame)
+    except sqlite3.IntegrityError as a:
+        registration_fail_user_exists()
 
 
 def delete_account_window():
@@ -121,7 +127,7 @@ def delete_account_window():
 
 
 def delete_account(confirmation_delete_account_window, account_deletion_window):
-    cursor_accounts_database.execute('DELETE FROM account WHERE username = %s', (current_user,))
+    cursor_accounts_database.execute('DELETE FROM account WHERE username = ?', (current_user,))
     select_frame(login_frame)
     conn_connect_to_server.commit()
     # I have a problem with closing the windows after deleting the account
@@ -166,8 +172,8 @@ def change_password(current_password, confirm_password, new_password_entry):
     usable_current_password = current_password.get()
     usable_confirm_password = confirm_password.get()
     usable_new_password = new_password_entry.get()
-    cursor_accounts_database.execute('UPDATE account SET password = %s WHERE username = %s', (usable_new_password,
-                                                                                              current_user))
+    cursor_accounts_database.execute('UPDATE account SET password = ? WHERE username = ?', (usable_new_password,
+                                                                                            current_user))
     conn_connect_to_server.commit()
     """
     -Write a if statements if passwords do not match
@@ -187,13 +193,13 @@ def add_contact_to_database():
     - Fetches unique user ID and gives it a variable
     - Inserts tree information into database, linking information with unique ID
     """
-    cursor_accounts_database.execute('SELECT id FROM account WHERE username = %s', (current_user,))
+    cursor_accounts_database.execute('SELECT id FROM account WHERE username = ?', (current_user,))
     current_user_id = cursor_accounts_database.fetchone()
     name = name_box.get()
     last_name = lastname_box.get()
     number = number_box.get()
     cursor_accounts_database.execute(f'INSERT INTO account_phones(id, first_name, last_name, phone_number) '
-                                     f'VALUES (%s, %s, %s, %s)',
+                                     f'VALUES (?, ?, ?, ?)',
                                      (current_user_id[0], name, last_name, number))
     conn_connect_to_server.commit()
     load_contacts_from_database()
@@ -210,30 +216,30 @@ def load_contacts_from_database():
     """
     for contact in my_tree.get_children():
         my_tree.delete(contact)
-    cursor_accounts_database.execute(f'SELECT id FROM account WHERE username = %s',
+    cursor_accounts_database.execute(f'SELECT id FROM account WHERE username = ?',
                                      (current_user,))
     current_user_id = cursor_accounts_database.fetchone()
 
-    cursor_accounts_database.execute(f'SELECT first_name, last_name, phone_number, contact_id '
-                                     f'FROM account_phones WHERE id = %s',
+    cursor_accounts_database.execute(f'SELECT first_name, last_name, phone_number, id_contact '
+                                     f'FROM account_phones WHERE id = ?',
                                      (current_user_id[0],))
     phone_book_data = cursor_accounts_database.fetchall()  # Contains the data in a tuple
     for row in phone_book_data:
-        first_name, last_name, phone, contact_id = row
-        my_tree.insert(parent='', index='end', iid=contact_id, text='Parent', values=(first_name, last_name, phone))
+        first_name, last_name, phone, id_contact = row
+        my_tree.insert(parent='', index='end', iid=id_contact, text='Parent', values=(first_name, last_name, phone))
 
 
 def remove_contact():
     delete_contacts = my_tree.selection()
     for record in delete_contacts:
-        contact_id = record
+        id_contact = record
         remove_contact_from_database(record)
-        my_tree.delete(contact_id)
+        my_tree.delete(id_contact)
 
 
-def remove_contact_from_database(contact_id):
-    contact_id = int(contact_id)
-    cursor_accounts_database.execute(f'DELETE FROM account_phones WHERE contact_id = %s', (contact_id, ))
+def remove_contact_from_database(id_contact):
+    id_contact = int(id_contact)
+    cursor_accounts_database.execute(f'DELETE FROM account_phones WHERE id_contact = ?', (id_contact, ))
     conn_connect_to_server.commit()
 
 
@@ -407,18 +413,18 @@ contact_management_frame.pack(pady=20)
 my_tree.pack()
 
 # ___ DataBase Creation ___
-# Create a database 'accounts' where accounts would be stored with id, username, password
-cursor_accounts_database.execute('CREATE DATABASE IF NOT EXISTS accounts')
-conn_connect_to_server.database = 'accounts'
+# Making sure foreign keys work
+cursor_accounts_database.execute("PRAGMA foreign_keys = ON;")
 # Creates a table with columns ID, USERNAME, PASSWORD
-cursor_accounts_database.execute('CREATE TABLE IF NOT EXISTS account (id INT PRIMARY KEY AUTO_INCREMENT, '
+cursor_accounts_database.execute('CREATE TABLE IF NOT EXISTS account (id INTEGER PRIMARY KEY AUTOINCREMENT, '
                                  'username VARCHAR(60) UNIQUE NOT NULL, '
                                  'password VARCHAR(60) NOT NULL)')
 # Creates a table with columns, ID, First_name, last_name, phone_number
-cursor_accounts_database.execute('CREATE TABLE IF NOT EXISTS account_phones (id INT,'
-                                 'id_contact INT PRIMARY KEY AUTO_INCREMENT, '
-                                 'first_name VARCHAR(60) UNIQUE NOT NULL, '
-                                 'last_name VARCHAR(60) UNIQUE NOT NULL, '
+cursor_accounts_database.execute('CREATE TABLE IF NOT EXISTS account_phones ('
+                                 'id INTEGER NOT NULL,'
+                                 'id_contact INTEGER PRIMARY KEY AUTOINCREMENT, '
+                                 'first_name VARCHAR(60) NOT NULL, '
+                                 'last_name VARCHAR(60) NOT NULL, '
                                  'phone_number INT NOT NULL,'
                                  'FOREIGN KEY (id) REFERENCES account(id))')
 
