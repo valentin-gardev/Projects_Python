@@ -7,7 +7,6 @@ import sqlite3
 # ___ Connect to DATABASE ___
 conn_connect_to_server = sqlite3.connect('User_contact_database.sqlite')
 cursor_accounts_database = conn_connect_to_server.cursor()
-
 # ___ DATABASE FUNCTIONS ___
 
 # ___ MESSAGE BOXES ___
@@ -372,7 +371,7 @@ my_tree.column('PhoneNumber', anchor=W, width=150)
 my_tree.heading('#0', text='Label', anchor=W)
 my_tree.heading('First name', text='First name', anchor=W)
 my_tree.heading('Last name', text='Last name', anchor=CENTER)
-
+my_tree.heading('PhoneNumber',text='PhoneNumber', anchor=W)
 # ___ Login frame pack ___
 
 login_title_label.pack()
