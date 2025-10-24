@@ -140,7 +140,6 @@ def delete_account(confirmation_delete_account_window, account_deletion_window):
 def change_password_window():
     """
     -check if passwords match with if
-    :return:
     """
     password_change_window = Toplevel()
     password_change_window.geometry('280x140')
@@ -275,15 +274,15 @@ login_username_label = Label(login_frame,
                              text='Username',
                              background='#9431ce')
 login_username_entry = Entry(login_frame,
-                       )
+                             )
 login_password_label = Label(login_frame,
                              text='Password',
                              background='#9431ce')
 login_password_entry = Entry(login_frame,
-                       )
+                             )
 login_button_menu_sign_in = Button(login_frame,
                                    text='Sign in',
-                                   command=lambda:account_login())
+                                   command=lambda: account_login())
 
 login_button_menu_sign_up = Button(login_frame,
                                    text='Register',
@@ -323,19 +322,19 @@ account_frame = Frame(app_window, background='#9431ce')
 pack_buttons_left = Frame(account_frame, background='#9431ce')
 contact_management_frame = Frame(account_frame)
 account_title_label = Label(account_frame,
-                    text=f'Welcome {current_user}',
-                    bd=13,
-                    fg='#D9D02E',
-                    font=('Ariel', 20, "bold"),
-                    relief=RAISED,
-                    padx=10,
-                    pady=10,
-                    bg='#6A2ED9'
-                    )
+                            text=f'Welcome {current_user}',
+                            bd=13,
+                            fg='#D9D02E',
+                            font=('Ariel', 20, "bold"),
+                            relief=RAISED,
+                            padx=10,
+                            pady=10,
+                            bg='#6A2ED9'
+                            )
 button_add_contact_ac = Button(pack_buttons_left,
                                text='Add Contact',
                                command=lambda: add_contact_to_database()
-                                   )
+                               )
 button_delete_contact_ac = Button(pack_buttons_left,
                                   text='Delete Contact',
                                   command=lambda: remove_contact())
