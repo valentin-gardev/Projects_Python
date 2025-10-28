@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
 import sqlite3
+import bcrypt
 # Functions of the different options
 
 # ___ Connect to DATABASE ___
@@ -69,13 +70,21 @@ def delete_account_confirmation(account_deletion_password_input, account_deletio
 
 
 def account_login():
+    """
+    - getting variable for username
+    - selecting password for username from database, if True continue
+    - comparing hashed database password with hashed input password
+    - if True, change current user, select login frame, load contacts from database
+    """
     global current_user
     usable_username_entry = login_username_entry.get()
     cursor_accounts_database.execute('SELECT password FROM account WHERE username = ?', (usable_username_entry,))
     result_of_login = cursor_accounts_database.fetchone()
     if result_of_login:
         stored_password = result_of_login[0]
-        if stored_password == login_password_entry.get():
+        login_pass = login_password_entry.get()
+        byte_login_pass = login_pass.encode('utf-8')
+        if bcrypt.checkpw(byte_login_pass, stored_password):
             current_user = usable_username_entry
             select_frame(account_frame)
             load_contacts_from_database()
@@ -87,13 +96,25 @@ def account_login():
 
 def register_account():
     try:
+        password = password_entry.get()
+        password_bytes = password.encode('utf-8')
+        hash_password = password_hash(password_bytes)
         cursor_accounts_database.execute(f'INSERT INTO account(username, password) VALUES (?, ?)',
-                                         (username_entry.get(), password_entry.get()))
+                                         (username_entry.get(), hash_password))
         conn_connect_to_server.commit()
         registration_complete()
         select_frame(login_frame)
     except sqlite3.IntegrityError as a:
         registration_fail_user_exists()
+
+
+def password_hash(password):
+    """
+    add password to the password_hash
+    """
+    salt = bcrypt.gensalt(rounds=13)
+    hash_pass = bcrypt.hashpw(password, salt)
+    return hash_pass
 
 
 def delete_account_window():
@@ -371,7 +392,7 @@ my_tree.column('PhoneNumber', anchor=W, width=150)
 my_tree.heading('#0', text='Label', anchor=W)
 my_tree.heading('First name', text='First name', anchor=W)
 my_tree.heading('Last name', text='Last name', anchor=CENTER)
-my_tree.heading('PhoneNumber',text='PhoneNumber', anchor=W)
+my_tree.heading('PhoneNumber', text='PhoneNumber', anchor=W)
 # ___ Login frame pack ___
 
 login_title_label.pack()
