@@ -38,6 +38,10 @@ def delete_account_incorrect_password():
     messagebox.showerror(title='Error', message='Wrong password!')
 
 
+def matching_passwords_error():
+    messagebox.showerror(title='Error', message='Confirmation password does not match!')
+
+
 def delete_account_confirmation(account_deletion_password_input, account_deletion_password_confirm_input,
                                 account_deletion_window):
     usable_account_deletion_password = account_deletion_password_input.get()
@@ -189,11 +193,26 @@ def change_password_window():
 
 def change_password(current_password, confirm_password, new_password_entry):
     usable_current_password = current_password.get()
+    usable_current_password_byte = usable_current_password.encode('utf-8')
     usable_confirm_password = confirm_password.get()
+    usable_confirm_password_byte = usable_confirm_password.encode('utf-8')
     usable_new_password = new_password_entry.get()
-    cursor_accounts_database.execute('UPDATE account SET password = ? WHERE username = ?', (usable_new_password,
-                                                                                            current_user))
-    conn_connect_to_server.commit()
+    usable_new_password_byte = usable_new_password.encode('utf-8')
+    if usable_current_password_byte == usable_confirm_password_byte:
+        cursor_accounts_database.execute('SELECT password FROM account WHERE username = ?', (current_user,))
+        database_account_password = cursor_accounts_database.fetchone()[0]
+        if bcrypt.checkpw(usable_current_password_byte, database_account_password):
+            hashed_new_password = password_hash(usable_new_password_byte)
+            cursor_accounts_database.execute('UPDATE account SET password = ? WHERE username = ?', (hashed_new_password,
+                                                                                                    current_user))
+            conn_connect_to_server.commit()
+        else:
+            '''
+            wrong_password message
+            '''
+            pass
+    else:
+        matching_passwords_error()
     """
     -Write a if statements if passwords do not match
     -Make different error windows about it
