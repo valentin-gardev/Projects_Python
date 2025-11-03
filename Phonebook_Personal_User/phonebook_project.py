@@ -421,7 +421,7 @@ login_password_label.pack()
 login_password_entry.pack()
 login_button_menu_sign_in.pack(pady=5)
 login_button_menu_sign_up.pack()
-
+login_password_entry.pack
 # ___ Sign up frame pack ___
 title_label.pack()
 username_label.pack()
