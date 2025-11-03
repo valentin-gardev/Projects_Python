@@ -411,7 +411,7 @@ my_tree.column('PhoneNumber', anchor=W, width=150)
 my_tree.heading('#0', text='Label', anchor=W)
 my_tree.heading('First name', text='First name', anchor=W)
 my_tree.heading('Last name', text='Last name', anchor=CENTER)
-my_tree.heading('PhoneNumber', text='PhoneNumber', anchor=W)
+my_tree.heading('PhoneNumber', text='PhoneNumber', anchor=CENTER)
 # ___ Login frame pack ___
 
 login_title_label.pack()
@@ -463,7 +463,7 @@ cursor_accounts_database.execute('CREATE TABLE IF NOT EXISTS account_phones ('
                                  'id_contact INTEGER PRIMARY KEY AUTOINCREMENT, '
                                  'first_name VARCHAR(60) NOT NULL, '
                                  'last_name VARCHAR(60) NOT NULL, '
-                                 'phone_number INT NOT NULL,'
+                                 'phone_number VARCHAR(60) NOT NULL,'
                                  'FOREIGN KEY (id) REFERENCES account(id))')
 
 
